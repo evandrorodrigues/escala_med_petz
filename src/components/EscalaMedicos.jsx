@@ -4,14 +4,15 @@ import { format, isValid, startOfToday } from "date-fns";
 
 // Dados estáticos
 const UNIDADES = [
-  "DJBA-AM", "TQTP-AM", "BNOC-BA", "PQSH-BA", "PRLA-BA", "ALDT-CE", "STDU-CE",
-  "WSOA-CE", "ASAN-DF", "BSIA-DF", "EPIA-DF", "GAMA-DF", "GBSL-DF", "PKSB-DF",
-  "TGTG-DF", "W3NT-DF", "ECOM-SP", "SERR-ES", "VLVL-ES", "VTRA-ES"
+  "DJBA-AM", "TQTP-AM", "BNOC-BA", "PQSH-BA", "PRLA-BA", 
+  "ALDT-CE", "STDU-CE", "WSOA-CE", "ASAN-DF", "BSIA-DF",
+  "EPIA-DF", "GAMA-DF", "GBSL-DF", "PKSB-DF", "TGTG-DF",
+  "W3NT-DF", "ECOM-SP", "SERR-ES", "VLVL-ES", "VTRA-ES"
 ];
 
 const HORARIOS = [
-  "09:00 às 15:00", "15:00 às 21:00", "14:00 às 20:00", 
-  "10:00 às 16:00", "13:00 às 19:00", "10:00 às 18:00", 
+  "09:00 às 15:00", "15:00 às 21:00", "14:00 às 20:00",
+  "10:00 às 16:00", "13:00 às 19:00", "10:00 às 18:00",
   "12:00 às 18:00"
 ];
 
@@ -22,7 +23,6 @@ const TIPOS_SOLICITACAO = [
   { label: "Justificativa", value: "Justificativa" }
 ];
 
-// Componente principal
 export default function EscalaMedicos() {
   // Estados
   const [formulario, setFormulario] = useState({
@@ -36,22 +36,14 @@ export default function EscalaMedicos() {
   const [unidades, setUnidades] = useState([]);
   const [enviando, setEnviando] = useState(false);
 
-  // Data mínima para seleção
+  // Helpers
   const dataMinima = format(startOfToday(), "yyyy-MM-dd");
-
-  // Validação de CNPJ
-  const validarCNPJ = useCallback((cnpj) => {
-    const cnpjLimpo = cnpj.replace(/\D/g, '');
-    return cnpjLimpo.length === 14;
-  }, []);
+  const validarCNPJ = useCallback((cnpj) => /^\d{14}$/.test(cnpj.replace(/\D/g, '')), []);
 
   // Manipulação de unidades
   const manipularUnidade = {
     adicionar: () => setUnidades([...unidades, { nome: "", dias: [] }]),
-    
-    remover: (index) => 
-      setUnidades(unidades.filter((_, i) => i !== index)),
-    
+    remover: (index) => setUnidades(unidades.filter((_, i) => i !== index)),
     atualizar: (index, nome) => {
       const novasUnidades = [...unidades];
       novasUnidades[index].nome = nome;
@@ -66,13 +58,11 @@ export default function EscalaMedicos() {
       novasUnidades[uIndex].dias.push({ data: "", horario: "" });
       setUnidades(novasUnidades);
     },
-
     remover: (uIndex, dIndex) => {
       const novasUnidades = [...unidades];
       novasUnidades[uIndex].dias.splice(dIndex, 1);
       setUnidades(novasUnidades);
     },
-
     atualizar: (uIndex, dIndex, campo, valor) => {
       if (campo === "data") {
         const data = new Date(valor);
@@ -81,14 +71,13 @@ export default function EscalaMedicos() {
           return;
         }
       }
-
       const novasUnidades = [...unidades];
       novasUnidades[uIndex].dias[dIndex][campo] = valor;
       setUnidades(novasUnidades);
     }
   };
 
-  // Validação e envio
+  // Validação do formulário
   const validarFormulario = () => {
     const camposObrigatorios = Object.values(formulario).every(Boolean);
     const cnpjValido = validarCNPJ(formulario.cnpj);
@@ -103,9 +92,9 @@ export default function EscalaMedicos() {
     return camposObrigatorios && cnpjValido && unidadesValidas;
   };
 
+  // Envio dos dados
   const enviarDados = async () => {
     if (!validarFormulario()) return;
-
     setEnviando(true);
 
     try {
@@ -136,7 +125,6 @@ export default function EscalaMedicos() {
         observacoes: ""
       });
       setUnidades([]);
-      
     } catch (erro) {
       alert(`Erro: ${erro.message}`);
     } finally {
@@ -155,26 +143,44 @@ export default function EscalaMedicos() {
       <main className="bg-white rounded-xl shadow-lg p-6">
         {/* Seção de Dados Cadastrais */}
         <section className="space-y-4 mb-8">
-          <InputTexto
-            label="Nome do Médico *"
-            value={formulario.medico}
-            onChange={(e) => setFormulario({...formulario, medico: e.target.value})}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nome do Médico *
+            </label>
+            <input
+              type="text"
+              value={formulario.medico}
+              onChange={(e) => setFormulario({...formulario, medico: e.target.value})}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
 
-          <InputTexto
-            label="CNPJ *"
-            value={formulario.cnpj}
-            onChange={(e) => setFormulario({...formulario, cnpj: e.target.value})}
-            maxLength={14}
-            inputMode="numeric"
-            placeholder="00.000.000/0000-00"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              CNPJ *
+            </label>
+            <input
+              type="text"
+              value={formulario.cnpj}
+              onChange={(e) => setFormulario({...formulario, cnpj: e.target.value})}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-300"
+              inputMode="numeric"
+              maxLength={14}
+              placeholder="00.000.000/0000-00"
+            />
+          </div>
 
-          <InputTexto
-            label="Coordenação *"
-            value={formulario.coordenacao}
-            onChange={(e) => setFormulario({...formulario, coordenacao: e.target.value})}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Coordenação *
+            </label>
+            <input
+              type="text"
+              value={formulario.coordenacao}
+              onChange={(e) => setFormulario({...formulario, coordenacao: e.target.value})}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
 
           <Select
             options={TIPOS_SOLICITACAO}
@@ -197,7 +203,12 @@ export default function EscalaMedicos() {
                   className="flex-1 react-select-container"
                   classNamePrefix="react-select"
                 />
-                <BotaoRemover onClick={() => manipularUnidade.remover(uIndex)} />
+                <button
+                  onClick={() => manipularUnidade.remover(uIndex)}
+                  className="px-3 py-1.5 text-red-600 hover:text-red-800 bg-red-100 rounded-md text-sm"
+                >
+                  Remover
+                </button>
               </div>
 
               <div className="space-y-3">
@@ -208,7 +219,7 @@ export default function EscalaMedicos() {
                       value={dia.data}
                       min={dataMinima}
                       onChange={(e) => manipularData.atualizar(uIndex, dIndex, "data", e.target.value)}
-                      className="input-date"
+                      className="p-2 border rounded-md flex-1 focus:outline-none focus:ring-1 focus:ring-blue-300"
                     />
                     <Select
                       options={HORARIOS.map(h => ({ label: h, value: h }))}
@@ -217,23 +228,30 @@ export default function EscalaMedicos() {
                       className="flex-1 react-select-container"
                       classNamePrefix="react-select"
                     />
-                    <BotaoRemoverPequeno 
-                      onClick={() => manipularData.remover(uIndex, dIndex)} 
-                    />
+                    <button
+                      onClick={() => manipularData.remover(uIndex, dIndex)}
+                      className="px-2 text-red-500 hover:text-red-700 text-lg"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
-                <BotaoSecundario
+                <button
                   onClick={() => manipularData.adicionar(uIndex)}
-                  texto="+ Adicionar Data/Horário"
-                />
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  + Adicionar Data/Horário
+                </button>
               </div>
             </div>
           ))}
 
-          <BotaoPrimario
+          <button
             onClick={manipularUnidade.adicionar}
-            texto="+ Adicionar Nova Unidade"
-          />
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            + Adicionar Nova Unidade
+          </button>
         </section>
 
         {/* Observações */}
@@ -244,66 +262,19 @@ export default function EscalaMedicos() {
           className="w-full mt-6 p-3 border rounded-lg focus:ring-2 focus:ring-blue-300 h-32"
         />
 
-        {/* Botão de Envio */}
-        <BotaoPrimario
+        {/* Botão de Envio Corrigido */}
+        <button
           onClick={enviarDados}
           disabled={enviando}
-          texto={enviando ? 'Salvando...' : 'Salvar Escala'}
-          cor={enviando ? 'cinza' : 'verde'}
-          className="mt-8"
-        />
+          className={`mt-8 w-full py-2 rounded-md font-medium transition-colors ${
+            enviando 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-green-600 hover:bg-green-700 text-white'
+          }`}
+        >
+          {enviando ? 'Salvando...' : 'Salvar Escala'}
+        </button>
       </main>
     </div>
   );
 }
-
-// Componentes auxiliares
-const InputTexto = ({ label, ...props }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-    <input
-      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-300"
-      {...props}
-    />
-  </div>
-);
-
-const BotaoPrimario = ({ texto, cor = 'verde', ...props }) => (
-  <button
-    className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${
-      cor === 'verde' 
-        ? 'bg-green-600 hover:bg-green-700 text-white' 
-        : 'bg-gray-400 cursor-not-allowed'
-    } ${props.className || ''}`}
-    {...props}
-  >
-    {texto}
-  </button>
-);
-
-const BotaoSecundario = ({ texto, ...props }) => (
-  <button
-    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-    {...props}
-  >
-    {texto}
-  </button>
-);
-
-const BotaoRemover = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="px-3 py-1.5 text-red-600 hover:text-red-800 bg-red-100 rounded-md text-sm"
-  >
-    Remover
-  </button>
-);
-
-const BotaoRemoverPequeno = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="px-2 text-red-500 hover:text-red-700 text-lg"
-  >
-    ×
-  </button>
-);
