@@ -1,16 +1,17 @@
 {
-  "name": "escala-medica",
-  "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+-    "dev": "next dev",
++    "dev": "react-scripts start",
+-    "build": "next build",
++    "build": "react-scripts build",
+-    "start": "next start"
++    "start": "react-scripts start"
   },
   "dependencies": {
-    "next": "^13.4.19",
+-    "next": "^13.4.19",
++    "react-scripts": "^5.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-select": "^5.7.4",
-    "date-fns": "^2.30.0"
+    // ... mantém o resto
   }
 }
